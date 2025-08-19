@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            background-image: url('https://images.pexels.com/photos/4947408/pexels-photo-4947408.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(24, 24, 27, 0.7); /* Dark gray overlay */
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05); /* Very subtle white overlay */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .shadow-3xl {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .gradient-button {
+            background-image: linear-gradient(45deg, #1d4ed8, #2563eb);
+            transition: all 0.3s ease-in-out;
+        }
+        .gradient-button:hover {
+            background-image: linear-gradient(45deg, #2563eb, #1d4ed8);
+            transform: scale(1.05);
+        }
+
+        .text-input-style {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease-in-out;
+        }
+        .text-input-style:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: #2563eb;
+        }
+        .text-input-style::placeholder {
+            color: #d1d5db; /* Light gray placeholder */
+        }
+
+    </style>
+</head>
+<body class="flex flex-col items-center py-12 min-h-screen text-white">
+    <div class="container p-8 rounded-3xl shadow-3xl w-full max-w-2xl mx-auto mb-8">
+        <div class="flex flex-col items-center">
+            <h1 class="text-4xl font-extrabold mb-4 text-gray-100">Fake News Detector</h1>
+            <p class="text-sm text-gray-300 mb-6 text-center">
+                Enter a news article's text below to check if it's fake or real.
+            </p>
+        </div>
+        
+        <form id="predictionForm" method="post" action="/predict">
+            <div class="mb-4">
+                <textarea 
+                    name="text" 
+                    id="newsText" 
+                    rows="10" 
+                    class="w-full p-4 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-500/50 text-input-style" 
+                    placeholder="Paste the news article text here..." required>{{ user_text }}</textarea>
+            </div>
+            <div class="flex justify-center">
+                <button 
+                    type="submit" 
+                    class="text-white font-semibold py-3 px-8 rounded-full gradient-button shadow-lg">
+                    Predict
+                </button>
+            </div>
+        </form>
+
+        <div id="result" class="mt-8 text-center text-2xl font-bold">
+            {% if prediction_result %}
+                <p class="text-gray-100">Prediction: <span class="{% if prediction_result == 'Fake News' %}text-red-400{% else %}text-green-400{% endif %}">
+                    {{ prediction_result }}
+                </span></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Prediction History Section -->
+    <div class="container p-8 rounded-3xl shadow-3xl w-full max-w-2xl mx-auto">
+        <h2 class="text-2xl font-bold mb-4 text-gray-100 text-center">Prediction History</h2>
+        {% if prediction_history %}
+            <div class="space-y-4">
+                {% for item in prediction_history %}
+                    <div class="p-4 rounded-lg border-2 {% if item.prediction == 'Fake News' %}border-red-400 bg-red-100/10{% else %}border-green-400 bg-green-100/10{% endif %} shadow-md">
+                        <p class="font-semibold text-gray-200">Prediction: 
+                            <span class="{% if item.prediction == 'Fake News' %}text-red-400{% else %}text-green-400{% endif %}">
+                                {{ item.prediction }}
+                            </span>
+                        </p>
+                        <p class="mt-2 text-sm text-gray-400 line-clamp-3">
+                            {{ item.text }}
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center text-gray-400">No predictions yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
